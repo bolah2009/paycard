@@ -144,6 +144,46 @@
     <button class="mdc-button" data-pay-btn>Pay &amp; Checkout Now</button>
 
     <script>
+      const appState = {};
+      const formatAsMoney = (amount, buyerCountry) => {
+        const { code, currency } = countries.find(
+          national => national.country === buyerCountry
+        );
+
+        return amount.toLocaleString(code, {
+          style: "currency",
+          currency: currency
+        });
+      };
+      const detectCardType = ({ target }) => target;
+      const validateCardExpiryDate = ({ target }) => target;
+      const validateCardHolderName = ({ target }) => target;
+
+      const uiCanInteract = () => {};
+      const displayCartTotal = ({ results }) => {
+        const [data] = results;
+        const { itemsInCart, buyerCountry } = data;
+        appState.items = itemsInCart;
+        appState.country = buyerCountry;
+        appState.bill = itemsInCart.reduce(
+          (accumulator, currentValue) => accumulator + currentValue.qty,
+          0
+        );
+        appState.billFormated = formatAsMoney(appState.bill, appState.country);
+        const element = document.querySelector("SPAN[data-bill]");
+        element.textContent = appState.billFormated;
+        uiCanInteract();
+      };
+
+      const fetchBill = () => {
+        const api =
+          "https://randomapi.com/api/006b08a801d82d0c9824dcfdfdfa3b3c";
+        fetch(api)
+          .then(response => response.json())
+          .then(data => displayCartTotal(data))
+          .catch(error => console.error(error));
+      };
+
       const supportedCards = {
         visa,
         mastercard
@@ -197,7 +237,9 @@
         }
       ];
 
-      const startApp = () => {};
+      const startApp = () => {
+        fetchBill();
+      };
 
       startApp();
     </script>
